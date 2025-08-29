@@ -1,4 +1,4 @@
-classdef Grid2D < AbsGrid
+classdef Grid2D < model.AbsGrid
     % Represents a Grid that has obstacle, rewards and blank values
     % arranged in a 2D grid with robots also placed on the grid
     % the goal of each robot is to accumulate the most amount of points
@@ -6,10 +6,10 @@ classdef Grid2D < AbsGrid
     properties(Access = private, Constant)
         KeySet = {'goal','mud','water','coins', 'food', 'wall', 'pit'};
         ValueSet = [100, -5, -7, 10, 3, -inf, -500];
-        ItemMap = containers.Map(keySet,valueSet
     end
 
     properties(Access = private)
+        ItemMap
         Goal %[row, col]
         Cells
         Robots
@@ -24,10 +24,15 @@ classdef Grid2D < AbsGrid
             % randomly generates different types of rewards
             % and randomly places the given number of randomly generated
             % robots
+            if rows < 1 || cols < 1
+                error('Grid2D:InvalidDimensions', "grid dimensions must be a positive integer")
+            end
+
+            obj.ItemMap = containers.Map(obj.KeySet,obj.ValueSet);
             obj.Goal = [randi(rows), randi(cols)];
             obj.Cells = zeros(rows,cols);
             % randomly place a goal location
-            obj.Cells(obj.Goal(1), obj.Goal(2)) = ItemMap.get("goal");
+            obj.Cells(obj.Goal(1), obj.Goal(2)) = obj.ItemMap("goal");
             obj.Robots = [];
         end
 
@@ -53,7 +58,7 @@ classdef Grid2D < AbsGrid
             %robots
             if any(arrayfun(arrayfun(@(r) r.on(robot.getPosn()), ...
                     obj.Robots)))
-                warning('Robot is already present here')
+                error('Grid2D:OverlappingRobot', 'Robot is already present here')
             else
                 obj.Robots(end+1) = robot;
             end
@@ -67,7 +72,7 @@ classdef Grid2D < AbsGrid
             if target == 0
                 obj.Cells(posn(1), posn(2)) = itmValue;
             else
-                warning('Cell already occupied')
+                error('Grid2D:OccupiedSpace', 'Cell already occupied')
             end
         end
 
