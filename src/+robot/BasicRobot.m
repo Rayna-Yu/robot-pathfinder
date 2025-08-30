@@ -15,11 +15,27 @@ classdef BasicRobot < AbsRobot
             obj.Speed = speed;
         end
         
-        function obj = move(obj, dir, obstacles, bounds)
-            %METHOD1 moves the robot in the given direction by the speed
+        function [obj, occupied] = move(obj, dir, occupied)
+            %moves the robot in the given direction by the speed
             %of this robot if the obstacles allows it
-            %   Detailed explanation goes here
-            
+            %   where dir is a direction vector and occupied is the matrix
+            % of occupied spaces by robots
+            newPos = obj.Posn + (dir * obj.Speed);
+            [rows, cols] = size(occupied);
+            if newPos(1)<1 || newPos(1)>rows || newPos(2)<1 || newPos(2)>cols
+                error('Grid2D:OutOfBounds', 'Robot out of bounds')
+            end
+
+            if occupied(newPos(1), newPos(2)) == 0
+                occupied(obj.Posn(1), obj.Posn(2)) = 0;
+                occupied(newPos(1), newPos(2)) = 1;
+                obj.Posn = newPos;
+            end
+        end
+
+        function posn = getPosn(obj)
+            %gets the position of the robot
+            posn = obj.Posn;
         end
     end
 end

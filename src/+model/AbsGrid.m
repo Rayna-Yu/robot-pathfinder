@@ -6,8 +6,11 @@ classdef AbsGrid
         getCells(obj)
         getMap(obj)
         addRobot(obj, robot)
+        removeRobot(obj, posn)
         addItem(obj, posn, itemValue)
+        removeItem(obj, posn)
         start(obj, algorithm)
+        foundEnd(obj)
     end
 end
 

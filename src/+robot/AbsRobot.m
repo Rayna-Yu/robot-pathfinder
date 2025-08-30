@@ -3,7 +3,8 @@ classdef (Abstract) AbsRobot
     %the concrete class and the obstacles present on the grid
     %   Detailed explanation goes here
     methods (Abstract)
-        move(obj, dir, obstacles, bounds)
+        move(obj, dir, cells)
+        getPosn(obj)
     end
 end
 

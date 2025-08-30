@@ -13,6 +13,7 @@ classdef Grid2D < model.AbsGrid
         Goal %[row, col]
         Cells
         Robots
+        Occupied
     end
     
     methods
@@ -25,7 +26,8 @@ classdef Grid2D < model.AbsGrid
             % and randomly places the given number of randomly generated
             % robots
             if rows < 1 || cols < 1
-                error('Grid2D:InvalidDimensions', "grid dimensions must be a positive integer")
+                error('Grid2D:InvalidDimensions', ...
+                    "grid dimensions must be a positive integer")
             end
 
             obj.ItemMap = containers.Map(obj.KeySet,obj.ValueSet);
@@ -34,9 +36,9 @@ classdef Grid2D < model.AbsGrid
             % randomly place a goal location
             obj.Cells(obj.Goal(1), obj.Goal(2)) = obj.ItemMap("goal");
             obj.Robots = [];
+            obj.Occupied = zeros(row, cols);
         end
 
-        % TODO : GOTTA RETURN COPIES
         function robots = getRobots(obj)
             %Returns a copy of all the robots present in this grid
             robots = obj.Robots;
@@ -55,13 +57,24 @@ classdef Grid2D < model.AbsGrid
 
         function obj = addRobots(obj, robot)
             %Adds a robot into the grid by adding the robot to the list of 
-            %robots
-            if any(arrayfun(arrayfun(@(r) r.on(robot.getPosn()), ...
-                    obj.Robots)))
-                error('Grid2D:OverlappingRobot', 'Robot is already present here')
+            %robots and marks the cells as occupied in the occupy matrix
+            robotPos = robot.getPosn();
+            if obj.Occupied(robotPos(1), robotPos(2)) == 1
+                error('Grid2D:OverlappingRobot', ...
+                    'Robot is already present here')
             else
                 obj.Robots(end+1) = robot;
+                obj.Occupied(robotPos(1), robotPos(2)) = 1;
             end
+        end
+
+        function obj = removeRobot(obj, posn)
+            [rows, cols] = size(obj.Cells);
+            if posn(1)<1 || posn(1)>rows || posn(2)<1 || posn(2)>cols
+                error('Grid2D:OutOfBounds', 'Position is out of bounds')
+            end
+
+            %TODO: IMPLEMENT
         end
 
         function obj = addItem(obj, posn, itmValue)
@@ -76,25 +89,38 @@ classdef Grid2D < model.AbsGrid
             end
         end
 
+       function obj = removeItem(obj, posn)
+            [rows, cols] = size(obj.Cells);
+            if posn(1)<1 || posn(1)>rows || posn(2)<1 || posn(2)>cols
+                error('Grid2D:OutOfBounds', 'Position is out of bounds')
+            end
+
+            if obj.Cells(posn(1), posn(2)) == 0
+                warndlg('No item in the selected cell', 'Empty Cell')
+            end
+
+            obj.Cells(posn(1), posn(2)) = 0;
+        end
+
         function obj = start(obj, algorithm)
             %Starts a given algorithm on the conditions of this grid
             play = true;
             while(play)
                 algorithm.next(obj)
-                if obj.goalReached()
+                if obj.foundEnd()
                     play = false;
                 end
             end
         end
-    end
 
-    methods(Access = private)
-        % determines whether the path finding is done by determining
-        % whether all robots have reached the goal
-        function done = goalReached(obj)
-            done = all(arrayfun(arrayfun(@(r) r.on(obj.Goal), ...
+        function bool = foundEnd(obj)
+            % determines whether the path finding is done by determining
+            % whether all robots have reached the goal
+            bool = all(arrayfun(arrayfun(@(r) r.on(obj.Goal), ...
                 obj.Robots)));
         end
+
     end
+
 end
 
