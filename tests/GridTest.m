@@ -79,13 +79,38 @@ classdef GridTest < matlab.unittest.TestCase
         
         function testAddItemOnOccupiedCell(testCase)
             g = model.Grid2D(5,5);
-            pos = [1,1];
+            pos = [3,2];
             g = g.addItem(pos, 10);
             
             % Try to add another item at same pos (should trigger warning)
             testCase.verifyError(@() g.addItem(pos, -7), ...
                 'Grid2D:OccupiedSpace', ...
                 "Should warn if cell already occupied");
+        end
+
+        function testAddRobot(testCase)
+            robotsInitial = testCase.Grid.getRobots();
+            testCase.verifyEqual(numel(robotsInitial), 0);
+
+            r = robot.BasicRobot([1,1], 2);
+            testCase.Grid = testCase.Grid.addRobots(r);
+            robots = testCase.Grid.getRobots();
+            testCase.verifyEqual(numel(robots), 1);
+            testCase.verifyEqual(robots(1).getPosn(), [1 1]);
+        end
+
+        function testAddRobotOutOfBounds(testCase)
+            r1 = robot.BasicRobot([5, 6], 1);
+            testCase.verifyError(@() testCase.Grid.addRobots(r1), ...
+                'Grid2D:OutOfBounds');
+        end
+
+        function testAddOverlappingRobot(testCase)
+            r1 = robot.BasicRobot([2 2], 3);
+            r2 = robot.BasicRobot([2 2], 1);
+            testCase.Grid = testCase.Grid.addRobots(r1);
+            testCase.verifyError(@() testCase.Grid.addRobots(r2), ...
+                'Grid2D:OverlappingRobot');
         end
         
     end

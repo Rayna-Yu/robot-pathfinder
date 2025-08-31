@@ -1,4 +1,4 @@
-classdef BasicRobot < AbsRobot
+classdef BasicRobot < robot.AbsRobot
     %ROBOT A robot that can move in the 4 directions, up, down, left, right
     %It has a position and a speed
     

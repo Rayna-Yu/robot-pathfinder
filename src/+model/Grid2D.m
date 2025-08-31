@@ -55,15 +55,20 @@ classdef Grid2D < model.AbsGrid
             map = obj.ItemMap;
         end
 
-        function obj = addRobots(obj, robot)
+        function obj = addRobots(obj, r)
             %Adds a robot into the grid by adding the robot to the list of 
             %robots and marks the cells as occupied in the occupy matrix
-            robotPos = robot.getPosn();
-            if obj.Occupied(robotPos(1), robotPos(2)) == 1
+            [rows, cols] = size(obj.Occupied);
+            robotPos = r.getPosn();
+            if robotPos(1)<1 || robotPos(1)>rows ...
+                    || robotPos(2)<1 || robotPos(2)>cols
+                    error('Grid2D:OutOfBounds', ...
+                        'Robot can not be placed out of bounds')
+            elseif obj.Occupied(robotPos(1), robotPos(2)) == 1
                 error('Grid2D:OverlappingRobot', ...
                     'Robot is already present here')
             else
-                obj.Robots(end+1) = robot;
+                obj.Robots = [obj.Robots, r];
                 obj.Occupied(robotPos(1), robotPos(2)) = 1;
             end
         end
