@@ -36,7 +36,7 @@ classdef Grid2D < model.AbsGrid
             % randomly place a goal location
             obj.Cells(obj.Goal(1), obj.Goal(2)) = obj.ItemMap("goal");
             obj.Robots = [];
-            obj.Occupied = zeros(row, cols);
+            obj.Occupied = zeros(rows, cols);
         end
 
         function robots = getRobots(obj)
@@ -69,12 +69,20 @@ classdef Grid2D < model.AbsGrid
         end
 
         function obj = removeRobot(obj, posn)
+            % removes the robot at a given position in the grid if such
+            % robot exists.
             [rows, cols] = size(obj.Cells);
             if posn(1)<1 || posn(1)>rows || posn(2)<1 || posn(2)>cols
                 error('Grid2D:OutOfBounds', 'Position is out of bounds')
             end
 
-            %TODO: IMPLEMENT
+            if obj.Occupied(posn(1), posn(2)) == 0
+                warndlg('No Robot in cell', 'No Robot')
+                return
+            end
+
+            obj.Occupied(posn(1), posn(2)) = 0;
+            obj.Robots(obj.Robots.getPosn() == posn) = [];
         end
 
         function obj = addItem(obj, posn, itmValue)
@@ -90,6 +98,8 @@ classdef Grid2D < model.AbsGrid
         end
 
        function obj = removeItem(obj, posn)
+           % removes the item at a specific position on the grid
+           % if that cell is not empty
             [rows, cols] = size(obj.Cells);
             if posn(1)<1 || posn(1)>rows || posn(2)<1 || posn(2)>cols
                 error('Grid2D:OutOfBounds', 'Position is out of bounds')
@@ -104,6 +114,7 @@ classdef Grid2D < model.AbsGrid
 
         function obj = start(obj, algorithm)
             %Starts a given algorithm on the conditions of this grid
+            % TODO : IMPLEMENT
             play = true;
             while(play)
                 algorithm.next(obj)

@@ -6,13 +6,20 @@ classdef GridTest < matlab.unittest.TestCase
             addpath(fullfile(pwd, '../src'));
         end
     end
+
+    properties
+        Grid
+    end
     
     methods(TestMethodSetup)
-        % Setup for each test
+        function createGrid(testCase)
+            testCase.Grid = model.Grid2D(5, 5);
+        end
     end
     
     
     methods (Test)
+        % constructor
         function testInvalidDimensions(testCase)
             % Check that constructor throws the correct error
             testCase.verifyError(@() model.Grid2D(0,0), ...
@@ -40,7 +47,25 @@ classdef GridTest < matlab.unittest.TestCase
             testCase.verifyTrue(any(cells(:) == goalVal), ...
                 "Grid must contain a goal");
         end
+
+        % Getters
+        function testGetRobotsEmpty(testCase)
+            testCase.verifyEmpty(testCase.Grid.getRobots());
+        end
+
+        function testGetCellsSize(testCase)
+            cells = testCase.Grid.getCells();
+            testCase.verifyEqual(size(cells), [5, 5]);
+        end
+
+        function testGetMap(testCase)
+            KeySet = {'goal','mud','water','coins', 'food', 'wall', 'pit'};
+            ValueSet = [100, -5, -7, 10, 3, -inf, -500];
+            map = testCase.Grid.getMap();
+            testCase.verifyEqual(map, containers.Map(KeySet,ValueSet));
+        end
         
+        % functions
         function testAddItem(testCase)
             g = model.Grid2D(5,5);
             pos = [2,3];
