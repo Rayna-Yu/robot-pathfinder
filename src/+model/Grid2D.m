@@ -55,6 +55,10 @@ classdef Grid2D < model.AbsGrid
             map = obj.ItemMap;
         end
 
+        function goal = getGoal(obj)
+            goal = obj.Goal;
+        end
+
         function obj = addRobots(obj, r)
             %Adds a robot into the grid by adding the robot to the list of 
             %robots and marks the cells as occupied in the occupy matrix
@@ -82,18 +86,24 @@ classdef Grid2D < model.AbsGrid
             end
 
             if obj.Occupied(posn(1), posn(2)) == 0
-                warndlg('No Robot in cell', 'No Robot')
+                warning('Grid2D:Warn', 'No robot in selected position')
                 return
             end
 
             obj.Occupied(posn(1), posn(2)) = 0;
-            obj.Robots(obj.Robots.getPosn() == posn) = [];
+            idx = arrayfun(@(r) isequal(r.getPosn(), posn), obj.Robots);
+            obj.Robots(idx) = [];
         end
 
         function obj = addItem(obj, posn, itmValue)
             %place item onto the grid of cells if there is not something
             %already there given the item value
             %where posn is [row,col] coordinate of the target item placement
+            [rows, cols] = size(obj.Cells);
+            if posn(1)<1 || posn(1)>rows || posn(2)<1 || posn(2)>cols
+                error('Grid2D:OutOfBounds', 'Position is out of bounds')
+            end
+
             target = obj.Cells(posn(1), posn(2));
             if target == 0
                 obj.Cells(posn(1), posn(2)) = itmValue;
@@ -111,7 +121,11 @@ classdef Grid2D < model.AbsGrid
             end
 
             if obj.Cells(posn(1), posn(2)) == 0
-                warndlg('No item in the selected cell', 'Empty Cell')
+                warning('Grid2D:Warn', 'No item in selected position')
+            end
+
+            if obj.Cells(posn(1), posn(2)) == obj.ItemMap('goal')
+                warning('Grid2D:Warn', 'Can not remove the goal')
             end
 
             obj.Cells(posn(1), posn(2)) = 0;
@@ -130,12 +144,10 @@ classdef Grid2D < model.AbsGrid
         end
 
         function bool = foundEnd(obj)
-            % determines whether the path finding is done by determining
-            % whether all robots have reached the goal
-            bool = all(arrayfun(arrayfun(@(r) r.on(obj.Goal), ...
-                obj.Robots)));
+            % Determines whether all robots have reached the goal
+            bool = all(arrayfun(@(r) isequal(r.getPosn(), obj.Goal), ...
+                obj.Robots));
         end
-
     end
 
 end
