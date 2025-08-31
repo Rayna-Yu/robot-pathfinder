@@ -38,7 +38,6 @@ classdef GridTest < matlab.unittest.TestCase
         end
         
         function testGridInitialization(testCase)
-            % create a grid and test dimensions
             rows = 10;
             cols = 15;
             g = model.Grid2D(rows, cols);
@@ -47,8 +46,7 @@ classdef GridTest < matlab.unittest.TestCase
             
             testCase.verifySize(cells, [rows cols], ...
                 "Grid dimensions should match input rows/cols");
-            
-            % verify goal is inside grid
+           
             map = g.getMap();
             goalVal = map("goal");
             testCase.verifyTrue(any(cells(:) == goalVal), ...
