@@ -88,6 +88,5 @@ classdef GridTest < matlab.unittest.TestCase
                 "Should warn if cell already occupied");
         end
         
-        %TODO : gotta add tests for add robot
     end
 end

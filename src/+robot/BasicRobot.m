@@ -17,7 +17,7 @@ classdef BasicRobot < AbsRobot
         
         function [obj, occupied] = move(obj, dir, occupied)
             %moves the robot in the given direction by the speed
-            %of this robot if the obstacles allows it
+            %of this robot if the occupied matrix allows it
             %   where dir is a direction vector and occupied is the matrix
             % of occupied spaces by robots
             newPos = obj.Posn + (dir * obj.Speed);
