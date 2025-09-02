@@ -27,7 +27,7 @@ classdef BasicController < handle
 
         function addRobot(obj, posn, speed)
             r = robot.BasicRobot(posn, speed);
-            obj.Model.addRobot(posn, r);
+            obj.Model.addRobot(r);
             obj.updateView();
         end
 

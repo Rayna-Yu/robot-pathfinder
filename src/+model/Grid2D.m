@@ -59,7 +59,7 @@ classdef Grid2D < model.AbsGrid
             goal = obj.Goal;
         end
 
-        function obj = addRobots(obj, r)
+        function obj = addRobot(obj, r)
             %Adds a robot into the grid by adding the robot to the list of 
             %robots and marks the cells as occupied in the occupy matrix
             [rows, cols] = size(obj.Occupied);
@@ -102,6 +102,10 @@ classdef Grid2D < model.AbsGrid
             [rows, cols] = size(obj.Cells);
             if posn(1)<1 || posn(1)>rows || posn(2)<1 || posn(2)>cols
                 error('Grid2D:OutOfBounds', 'Position is out of bounds')
+            end
+
+            if (itmValue == obj.ItemMap("goal"))
+                error('Grid2D:InvalidInput', 'Can not add an additional goal')
             end
 
             target = obj.Cells(posn(1), posn(2));
