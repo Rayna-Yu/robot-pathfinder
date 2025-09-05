@@ -3,9 +3,20 @@ classdef Grid2D < model.AbsGrid
     % arranged in a 2D grid with robots also placed on the grid
     % the goal of each robot is to accumulate the most amount of points
     
-    properties(Access = private, Constant)
-        KeySet = {'goal','mud','water','coins', 'food', 'wall', 'pit'};
-        ValueSet = [100, -5, -7, 10, 3, -inf, -500];
+    properties (Access = private, Constant)
+        KeySet = {'goal', 'mud', 'water', 'coin', 'food', 'pit'}
+        ValueSet = {struct('value', 100, 'color',[0,1,0], 'marker','s', ...
+            'size', 14, 'label','Goal', 'type','positive'), ...
+            struct('value', -5, 'color',[0.4,0.2,0], ...
+            'marker','o', 'size',12, 'label','Mud', 'type','negative'), ...
+            struct('value', -7, 'color',[0,0,1], ...
+            'marker','o', 'size',12, 'label','Water', 'type','negative'), ...
+            struct('value', 10, 'color',[1,0.84,0], ...
+            'marker','o', 'size',10, 'label','Coin', 'type','positive'), ...
+            struct('value', 3, 'color',[1,0.5,0],  ...
+            'marker','o', 'size',10, 'label','Food', 'type','positive'), ...
+            struct('value', -100, 'color',[0,0,0], ...
+            'marker','o', 'size',14, 'label','Pit', 'type','negative')}
     end
 
     properties(Access = private)
@@ -29,12 +40,12 @@ classdef Grid2D < model.AbsGrid
                 error('Grid2D:InvalidDimensions', ...
                     "grid dimensions must be a positive integer")
             end
-
-            obj.ItemMap = containers.Map(obj.KeySet,obj.ValueSet);
+            obj.ItemMap = containers.Map(obj.KeySet, obj.ValueSet);
             obj.Goal = [randi(rows), randi(cols)];
             obj.Cells = zeros(rows,cols);
             % randomly place a goal location
-            obj.Cells(obj.Goal(1), obj.Goal(2)) = obj.ItemMap("goal");
+            valStruct = obj.ItemMap('goal');
+            obj.Cells(obj.Goal(1), obj.Goal(2)) = valStruct.value;
             obj.Robots = [];
             obj.Occupied = zeros(rows, cols);
         end
@@ -95,21 +106,27 @@ classdef Grid2D < model.AbsGrid
             obj.Robots(idx) = [];
         end
 
-        function obj = addItem(obj, posn, itmValue)
+        function obj = addItem(obj, posn, itemName)
             %place item onto the grid of cells if there is not something
             %already there given the item value
             %where posn is [row,col] coordinate of the target item placement
             [rows, cols] = size(obj.Cells);
+            if ~isKey(obj.ItemMap, itemName)
+                error('Grid2D:InvalidInput', 'Unknown item type')
+            end
+
+            itemStruct = obj.ItemMap(itemName);
+            itmValue = itemStruct.value;
+
             if posn(1)<1 || posn(1)>rows || posn(2)<1 || posn(2)>cols
                 error('Grid2D:OutOfBounds', 'Position is out of bounds')
             end
 
-            if (itmValue == obj.ItemMap("goal"))
+            if (itmValue == obj.ItemMap("goal").value)
                 error('Grid2D:InvalidInput', 'Can not add an additional goal')
             end
 
-            target = obj.Cells(posn(1), posn(2));
-            if target == 0
+            if obj.Cells(posn(1), posn(2)) == 0
                 obj.Cells(posn(1), posn(2)) = itmValue;
             else
                 error('Grid2D:OccupiedSpace', 'Cell already occupied')
@@ -128,7 +145,7 @@ classdef Grid2D < model.AbsGrid
                 warning('Grid2D:Warn', 'No item in selected position')
             end
 
-            if obj.Cells(posn(1), posn(2)) == obj.ItemMap('goal')
+            if obj.Cells(posn(1), posn(2)) == obj.ItemMap('goal').value
                 warning('Grid2D:Warn', 'Can not remove the goal')
             end
 
