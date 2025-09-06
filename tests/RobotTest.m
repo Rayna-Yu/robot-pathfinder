@@ -27,7 +27,7 @@ classdef RobotTest < matlab.unittest.TestCase
             occupied(3,3) = 1;
             r = robot.BasicRobot([3 3], 1);
             
-            [r, occupied] = r.move([-1 0], occupied); % move up
+            occupied = r.move([-1 0], occupied); % move up
             testCase.verifyEqual(r.getPosn(), [2 3]);
             testCase.verifyEqual(occupied(2,3), 1);
             testCase.verifyEqual(occupied(3,3), 0);
@@ -38,7 +38,7 @@ classdef RobotTest < matlab.unittest.TestCase
             occupied(2,3) = 1;
             r = robot.BasicRobot([2 3], 1);
             
-            [r, occupied] = r.move([1 0], occupied); % move down
+            occupied = r.move([1 0], occupied); % move down
             testCase.verifyEqual(r.getPosn(), [3 3]);
             testCase.verifyEqual(occupied(3,3), 1);
             testCase.verifyEqual(occupied(2,3), 0);
@@ -49,7 +49,7 @@ classdef RobotTest < matlab.unittest.TestCase
             occupied(3,3) = 1;
             r = robot.BasicRobot([3 3], 1);
             
-            [r, occupied] = r.move([0 -1], occupied); % move left
+            occupied = r.move([0 -1], occupied); % move left
             testCase.verifyEqual(r.getPosn(), [3 2]);
             testCase.verifyEqual(occupied(3,2), 1);
             testCase.verifyEqual(occupied(3,3), 0);
@@ -60,7 +60,7 @@ classdef RobotTest < matlab.unittest.TestCase
             occupied(3,3) = 1;
             r = robot.BasicRobot([3 3], 1);
             
-            [r, occupied] = r.move([0 1], occupied); % move right
+            occupied = r.move([0 1], occupied); % move right
             testCase.verifyEqual(r.getPosn(), [3 4]);
             testCase.verifyEqual(occupied(3,4), 1);
             testCase.verifyEqual(occupied(3,3), 0);
@@ -72,7 +72,7 @@ classdef RobotTest < matlab.unittest.TestCase
             occupied(2,3) = 1; 
             r = robot.BasicRobot([3 3], 1);
             
-            [r, occupied] = r.move([-1 0], occupied);
+            occupied = r.move([-1 0], occupied);
             testCase.verifyEqual(r.getPosn(), [3 3]);
             testCase.verifyEqual(occupied(3,3), 1);
         end
@@ -91,7 +91,7 @@ classdef RobotTest < matlab.unittest.TestCase
             occupied(2,2) = 1;
             r = robot.BasicRobot([2 2], 2);
             
-            [r, occupied] = r.move([0 1], occupied); % move right by 2
+            occupied = r.move([0 1], occupied); % move right by 2
             testCase.verifyEqual(r.getPosn(), [2 4]);
             testCase.verifyEqual(occupied(2,4), 1);
             testCase.verifyEqual(occupied(2,2), 0);
@@ -105,8 +105,8 @@ classdef RobotTest < matlab.unittest.TestCase
             r1 = robot.BasicRobot([2 2], 1);
             r2 = robot.BasicRobot([4 4], 1);
             
-            [r1, occupied] = r1.move([1 0], occupied); % move down
-            [r2, occupied] = r2.move([-1 0], occupied); % move up
+            occupied = r1.move([1 0], occupied); % move down
+            occupied = r2.move([-1 0], occupied); % move up
             
             testCase.verifyEqual(r1.getPosn(), [3 2]);
             testCase.verifyEqual(r2.getPosn(), [3 4]);

@@ -48,7 +48,8 @@ classdef GridTest < matlab.unittest.TestCase
                 "Grid dimensions should match input rows/cols");
            
             map = g.getMap();
-            goalVal = map("goal");
+            goalStruct = map("goal");
+            goalVal = goalStruct.value;
             testCase.verifyTrue(any(cells(:) == goalVal), ...
                 "Grid must contain a goal");
         end
@@ -64,8 +65,19 @@ classdef GridTest < matlab.unittest.TestCase
         end
 
         function testGetMap(testCase)
-            KeySet = {'goal','mud','water','coins', 'food', 'wall', 'pit'};
-            ValueSet = [100, -5, -7, 10, 3, -inf, -500];
+            KeySet = {'goal', 'mud', 'water', 'coin', 'food', 'pit'};
+            ValueSet = {struct('value', 100, 'color',[0,1,0], 'marker','s', ...
+                'size', 14, 'label','Goal', 'type','positive'), ...
+                struct('value', -5, 'color',[0.4,0.2,0], ...
+                'marker','o', 'size',12, 'label','Mud', 'type','negative'), ...
+                struct('value', -7, 'color',[0,0,1], ...
+                'marker','o', 'size',12, 'label','Water', 'type','negative'), ...
+                struct('value', 10, 'color',[1,0.84,0], ...
+                'marker','o', 'size',10, 'label','Coin', 'type','positive'), ...
+                struct('value', 3, 'color',[1,0.5,0],  ...
+                'marker','o', 'size',10, 'label','Food', 'type','positive'), ...
+                struct('value', -100, 'color',[0,0,0], ...
+                'marker','o', 'size',14, 'label','Pit', 'type','negative')};
             map = testCase.Grid.getMap();
             testCase.verifyEqual(map, containers.Map(KeySet,ValueSet));
         end
@@ -76,7 +88,7 @@ classdef GridTest < matlab.unittest.TestCase
             testCase.verifyEqual(numel(robotsInitial), 0);
 
             r = robot.BasicRobot([1,1], 2);
-            testCase.Grid = testCase.Grid.addRobots(r);
+            testCase.Grid = testCase.Grid.addRobot(r);
             robots = testCase.Grid.getRobots();
             testCase.verifyEqual(numel(robots), 1);
             testCase.verifyEqual(robots(1).getPosn(), [1 1]);
@@ -84,23 +96,23 @@ classdef GridTest < matlab.unittest.TestCase
 
         function testAddRobotOutOfBounds(testCase)
             r1 = robot.BasicRobot([5, 6], 1);
-            testCase.verifyError(@() testCase.Grid.addRobots(r1), ...
+            testCase.verifyError(@() testCase.Grid.addRobot(r1), ...
                 'Grid2D:OutOfBounds');
         end
 
         function testAddOverlappingRobot(testCase)
             r1 = robot.BasicRobot([2 2], 3);
             r2 = robot.BasicRobot([2 2], 1);
-            testCase.Grid = testCase.Grid.addRobots(r1);
-            testCase.verifyError(@() testCase.Grid.addRobots(r2), ...
+            testCase.Grid = testCase.Grid.addRobot(r1);
+            testCase.verifyError(@() testCase.Grid.addRobot(r2), ...
                 'Grid2D:OverlappingRobot');
         end
 
         function testRemoveRobot(testCase)
             r = robot.BasicRobot([3 3], 1);
             r2 = robot.BasicRobot([2, 1], 1);
-            testCase.Grid = testCase.Grid.addRobots(r);
-            testCase.Grid = testCase.Grid.addRobots(r2);
+            testCase.Grid = testCase.Grid.addRobot(r);
+            testCase.Grid = testCase.Grid.addRobot(r2);
             testCase.Grid = testCase.Grid.removeRobot([3 3]);
             testCase.verifyEqual(numel(testCase.Grid.getRobots()), 1);
             testCase.Grid = testCase.Grid.removeRobot([2, 1]);
@@ -124,7 +136,7 @@ classdef GridTest < matlab.unittest.TestCase
             g = model.Grid2D(5,5);
             val = 10;
             pos = testCase.FreePos;
-            g = g.addItem(pos,val);
+            g = g.addItem(pos,"coin");
             
             cells = g.getCells();
             testCase.verifyEqual(cells(pos(1),pos(2)), val, ...
@@ -133,25 +145,25 @@ classdef GridTest < matlab.unittest.TestCase
         
         function testAddItemOnOccupiedCell(testCase)
             g = model.Grid2D(5,5);
-            g = g.addItem(testCase.FreePos, 10);
+            g = g.addItem(testCase.FreePos, "coin");
             
-            testCase.verifyError(@() g.addItem(testCase.FreePos, -7), ...
+            testCase.verifyError(@() g.addItem(testCase.FreePos, "water"), ...
                 'Grid2D:OccupiedSpace');
         end
 
         function testAddItemOnGoal(testCase)
             goal = testCase.Grid.getGoal();
-            testCase.verifyError(@() testCase.Grid.addItem(goal, 5), ...
+            testCase.verifyError(@() testCase.Grid.addItem(goal, "food"), ...
                 'Grid2D:OccupiedSpace');
         end
 
         function testAddItemOutOfBounds(testCase)
-            testCase.verifyError(@() testCase.Grid.addItem([1 6], 5), ...
+            testCase.verifyError(@() testCase.Grid.addItem([1 6], "pit"), ...
                 'Grid2D:OutOfBounds');
         end
 
         function testRemoveItem(testCase)
-            testCase.Grid = testCase.Grid.addItem(testCase.FreePos, 10);
+            testCase.Grid = testCase.Grid.addItem(testCase.FreePos, "coin");
             cells = testCase.Grid.getCells();
             testCase.verifyEqual(cells(testCase.FreePos(1), ...
                 testCase.FreePos(2)), 10);
@@ -186,22 +198,35 @@ classdef GridTest < matlab.unittest.TestCase
         function testFoundEndRobotsNone(testCase)
             r1 = robot.BasicRobot([1 1], 2);
             r2 = robot.BasicRobot([2 2], 1);
-            testCase.Grid = testCase.Grid.addRobots(r1);
-            testCase.Grid = testCase.Grid.addRobots(r2);
+            testCase.Grid = testCase.Grid.addRobot(r1);
+            testCase.Grid = testCase.Grid.addRobot(r2);
             testCase.verifyFalse(testCase.Grid.foundEnd());
         end
 
         function testFoundEndRobots(testCase)
             goal = testCase.Grid.getGoal();
             r1 = robot.BasicRobot(goal, 2);
-            testCase.Grid = testCase.Grid.addRobots(r1);
+            testCase.Grid = testCase.Grid.addRobot(r1);
             testCase.verifyTrue(testCase.Grid.foundEnd());
 
             r2 = robot.BasicRobot([2, 3], 2);
-            testCase.Grid = testCase.Grid.addRobots(r2);
+            testCase.Grid = testCase.Grid.addRobot(r2);
             testCase.verifyFalse(testCase.Grid.foundEnd());
         end
 
+        function testCanMove(testCase)
+            testCase.verifyFalse(testCase.Grid.canMove([1, 6]))
+            testCase.verifyFalse(testCase.Grid.canMove([-1, 5]))
+            testCase.verifyTrue(testCase.Grid.canMove([1, 5]))
+            testCase.verifyTrue(testCase.Grid.canMove([2, 2]))
+            testCase.verifyFalse(testCase.Grid.canMove([0, 6]))
+
+            r1 = robot.BasicRobot([2, 3], 1);
+            testCase.Grid.addRobot(r1);
+            testCase.verifyFalse(testCase.Grid.canMove([2, 3]))
+        end
+
+        % TODO : test move
         % TODO : add tests for start and the algorithm
 
     end

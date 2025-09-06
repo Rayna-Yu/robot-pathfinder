@@ -16,7 +16,7 @@ classdef BasicRobot < robot.AbsRobot
             obj.Speed = speed;
         end
         
-        function [obj, occupied] = move(obj, dir, occupied)
+        function occupied = move(obj, dir, occupied)
             %moves the robot in the given direction by the speed
             %of this robot if the occupied matrix allows it
             %   where dir is a direction vector and occupied is the matrix

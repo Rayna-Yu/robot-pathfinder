@@ -11,6 +11,7 @@ classdef (Abstract) AbsGrid < handle
         removeItem(obj, posn)
         start(obj, algorithm)
         foundEnd(obj)
+        withinBounds(obj, posn)
     end
 end
 

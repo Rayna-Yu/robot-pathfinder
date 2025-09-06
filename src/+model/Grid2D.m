@@ -53,7 +53,6 @@ classdef Grid2D < model.AbsGrid
         function robots = getRobots(obj)
             %Returns a copy of all the robots present in this grid
             robots = obj.Robots;
-
         end
 
         function cells = getCells(obj)
@@ -164,10 +163,22 @@ classdef Grid2D < model.AbsGrid
             end
         end
 
+        function move(obj, robotIdx, dir)
+            robot = obj.Robots(robotIdx);
+            obj.Occupied = robot.move(dir, obj.Occupied);
+        end
+
         function bool = foundEnd(obj)
             % Determines whether all robots have reached the goal
             bool = all(arrayfun(@(r) isequal(r.getPosn(), obj.Goal), ...
                 obj.Robots));
+        end
+
+        function bool = canMove(obj, posn)
+            % Is the given posn in the bounds of this grid?
+            [rows, cols] = size(obj.Cells);
+            inBounds = posn(1)>=1 && posn(1)<=rows && posn(2)>=1 && posn(2)<=cols;
+            bool = inBounds && obj.Occupied(posn(1), posn(2)) == 0;
         end
     end
 

@@ -1,4 +1,4 @@
-classdef (Abstract) AbsRobot
+classdef (Abstract) AbsRobot < handle
     %AbsRobot A robot class that can move in a direction given the rules of
     %the concrete class and the obstacles present on the grid
     %   Detailed explanation goes here
