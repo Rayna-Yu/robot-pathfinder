@@ -31,6 +31,8 @@ classdef BasicRobot < robot.AbsRobot
                 occupied(obj.Posn(1), obj.Posn(2)) = 0;
                 occupied(newPos(1), newPos(2)) = 1;
                 obj.Posn = newPos;
+            else
+                error('Grid2D:Collision', 'Robots can not collide')
             end
         end
 

@@ -83,8 +83,8 @@ classdef rl
                 goal = map("goal");
                 done = (reward == goal.value);
             catch ME
-                if strcmp(ME.identifier, 'Grid2D:OutOfBounds')
-                    reward = -100; % punish hitting wall
+                if strcmp(ME.identifier, 'Grid2D:OutOfBounds', 'Grid2D:Collision')
+                    reward = -200;
                     done = true;
                 else
                     rethrow(ME);
