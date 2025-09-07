@@ -70,11 +70,11 @@ classdef RobotTest < matlab.unittest.TestCase
             occupied = zeros(5,5);
             occupied(3,3) = 1;
             occupied(2,3) = 1; 
-            r = robot.BasicRobot([3 3], 1);
+            r1 = robot.BasicRobot([3 3], 1);
+            r2 = robot.BasicRobot([2, 3], 2);
             
-            occupied = r.move([-1 0], occupied);
-            testCase.verifyEqual(r.getPosn(), [3 3]);
-            testCase.verifyEqual(occupied(3,3), 1);
+            testCase.verifyError(@() r1.move([-1 0], occupied), ...
+                'Grid2D:Collision')
         end
         
         function testOutOfBoundsThrowsError(testCase)
