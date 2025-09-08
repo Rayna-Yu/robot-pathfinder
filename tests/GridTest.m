@@ -1,5 +1,5 @@
 classdef GridTest < matlab.unittest.TestCase
-    % Unit tests for the Grid2D class
+    % GridTest: A test suite for the Grid2D class
 
     methods(TestClassSetup)
         function addModelToPath(testCase)
@@ -9,7 +9,7 @@ classdef GridTest < matlab.unittest.TestCase
 
     properties
         Grid
-        FreePos
+        FreePosn
     end
     
     methods(TestMethodSetup)
@@ -17,9 +17,9 @@ classdef GridTest < matlab.unittest.TestCase
             testCase.Grid = model.Grid2D(5, 5);
             goal = testCase.Grid.getGoal();
             if (goal(1) ~= 5)
-                testCase.FreePos = [goal(1) + 1,goal(2)];
+                testCase.FreePosn = [goal(1) + 1,goal(2)];
             else
-                testCase.FreePos = [goal(1) - 1, goal(2)];
+                testCase.FreePosn = [goal(1) - 1, goal(2)];
             end
         end
     end
@@ -135,19 +135,19 @@ classdef GridTest < matlab.unittest.TestCase
         function testAddItem(testCase)
             g = model.Grid2D(5,5);
             val = 400;
-            pos = testCase.FreePos;
-            g = g.addItem(pos,"coin");
+            posn = testCase.FreePosn;
+            g = g.addItem(posn,"coin");
             
             cells = g.getCells();
-            testCase.verifyEqual(cells(pos(1),pos(2)), val, ...
+            testCase.verifyEqual(cells(posn(1),posn(2)), val, ...
                 "Item should be placed in correct location");
         end
         
         function testAddItemOnOccupiedCell(testCase)
             g = model.Grid2D(5,5);
-            g = g.addItem(testCase.FreePos, "coin");
+            g = g.addItem(testCase.FreePosn, "coin");
             
-            testCase.verifyError(@() g.addItem(testCase.FreePos, "water"), ...
+            testCase.verifyError(@() g.addItem(testCase.FreePosn, "water"), ...
                 'Grid2D:OccupiedSpace');
         end
 
@@ -163,20 +163,20 @@ classdef GridTest < matlab.unittest.TestCase
         end
 
         function testRemoveItem(testCase)
-            testCase.Grid = testCase.Grid.addItem(testCase.FreePos, "coin");
+            testCase.Grid = testCase.Grid.addItem(testCase.FreePosn, "coin");
             cells = testCase.Grid.getCells();
-            testCase.verifyEqual(cells(testCase.FreePos(1), ...
-                testCase.FreePos(2)), 400);
+            testCase.verifyEqual(cells(testCase.FreePosn(1), ...
+                testCase.FreePosn(2)), 400);
             
 
-            testCase.Grid = testCase.Grid.removeItem(testCase.FreePos);
+            testCase.Grid = testCase.Grid.removeItem(testCase.FreePosn);
             cells = testCase.Grid.getCells();
-            testCase.verifyEqual(cells(testCase.FreePos(1), ...
-                testCase.FreePos(2)), 0);
+            testCase.verifyEqual(cells(testCase.FreePosn(1), ...
+                testCase.FreePosn(2)), 0);
         end
 
         function testRemoveItemEmptyCell(testCase)
-            testCase.verifyWarning(@() testCase.Grid.removeItem(testCase.FreePos), ...
+            testCase.verifyWarning(@() testCase.Grid.removeItem(testCase.FreePosn), ...
                 'Grid2D:Warn');
         end
 
@@ -226,7 +226,42 @@ classdef GridTest < matlab.unittest.TestCase
             testCase.verifyFalse(testCase.Grid.canMove([2, 3]))
         end
 
-        % TODO : test move
+        function testRobotMove(testCase)
+            r = robot.BasicRobot(testCase.FreePosn, 1);
+            testCase.Grid.addRobot(r);
+            
+            if (testCase.FreePosn(1) < 5)
+                dir = [1, 0]
+            else
+                dir = [-1, 0]
+            end
+
+            testCase.Grid.move(1, dir);
+            move = testCase.FreePosn + dir;
+            
+            robots = testCase.Grid.getRobots();
+            newPosn = robots(1).getPosn();
+            testCase.verifyEqual(newPosn, move, ...
+                "Robot should have moved down");
+            
+            testCase.verifyTrue(testCase.Grid.canMove(testCase.FreePosn), ...
+                "Original cell should now be free");
+            testCase.verifyFalse(testCase.Grid.canMove(move), ...
+                "New cell should be occupied"); 
+
+            if (move(2) < 5)
+                dir2 = [0, 1];
+            else
+                dir2 = [0, -1];
+            end
+            
+            testCase.Grid.move(1, dir2);
+            robotsUpdate = testCase.Grid.getRobots();
+            newPosn = robotsUpdate(1).getPosn();
+            testCase.verifyEqual(newPosn, testCase.FreePosn + dir2 + dir, ...
+                "Robot should have moved right");
+        end
+
         % TODO : add tests for start and the algorithm
 
     end

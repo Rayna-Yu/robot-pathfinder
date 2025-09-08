@@ -1,4 +1,5 @@
 classdef RobotTest < matlab.unittest.TestCase
+    % RobotTest: A test suite for the BasicRobot
     methods(TestClassSetup)
         function addModelToPath(testCase)
             addpath(fullfile(pwd, '../src'));

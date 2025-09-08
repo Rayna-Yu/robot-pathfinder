@@ -20,6 +20,10 @@ classdef rl
             obj.Q = zeros(numStates, numActions);
         end
 
+        function q = getQ(obj)
+            q = obj.Q;
+        end
+
         function [obj, totalReward] = trainEpisode(obj, maxSteps)
             totalReward = 0;
             robots = obj.ModelGrid.getRobots();
