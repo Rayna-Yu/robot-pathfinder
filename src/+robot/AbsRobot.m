@@ -5,6 +5,7 @@ classdef (Abstract) AbsRobot < handle
     methods (Abstract)
         move(obj, dir, cells)
         getPosn(obj)
+        copy(obj)
     end
 end
 

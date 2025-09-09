@@ -7,24 +7,49 @@ classdef rl
         Q
         alpha = 0.1
         gamma = 0.9
-        epsilon = 0.2
-        actions
+        epsilon = 0.3
+        Actions
+        Observers
     end
     
     methods
         function obj = rl(grid)
+            % Initial constructor for the Reinforcement Learning algorithm
+            % given a grid
             obj.ModelGrid = grid;
-            obj.actions = {[-1 0], [1 0], [0 -1], [0 1]};
+            obj.Actions = {[-1 0], [1 0], [0 -1], [0 1]};
             numStates = numel(grid.getCells());
-            numActions = numel(obj.actions);
+            numActions = numel(obj.Actions);
             obj.Q = zeros(numStates, numActions);
+            obj.Observers = {};
         end
 
         function q = getQ(obj)
+            % Gets Q
             q = obj.Q;
         end
 
+        function obj = addObserver(obj, callback)
+            % Register a new observer callback
+            if isempty(obj.Observers)
+                obj.Observers = {callback};
+            else
+                obj.Observers{end+1} = callback;
+            end
+        end
+    
+        function notifyObservers(obj, data)
+            % Call all registered observers with event data
+            if ~isempty(obj.Observers)
+                for i = 1:numel(obj.Observers)
+                    obj.Observers{i}(data);
+                end
+            end
+        end
+
         function [obj, totalReward] = trainEpisode(obj, maxSteps)
+            % Trains one episode of the reinforcement learning
+            obj.ModelGrid.reset();
             totalReward = 0;
             robots = obj.ModelGrid.getRobots();
             numRobots = length(robots);
@@ -41,7 +66,7 @@ classdef rl
                     posn = robots(r).getPosn();
                     state = obj.encodeState(posn);
        
-                    numActions = numel(obj.actions);
+                    numActions = numel(obj.Actions);
                     if rand < obj.epsilon
                         actionIdx = randi(numActions);
                     else
@@ -57,6 +82,15 @@ classdef rl
                         - obj.Q(state, actionIdx));
         
                     rewards(r) = reward;
+
+                    eventData = struct( ...
+                        'type', 'step', ...
+                        'state', state, ...
+                        'action', actionIdx, ...
+                        'reward', reward, ...
+                        'newState', newState ...
+                    );
+                    obj.notifyObservers(eventData);
         
                     if done
                         doneFlags(r) = true;
@@ -64,6 +98,13 @@ classdef rl
                 end
         
                 totalReward = totalReward + sum(rewards);
+
+                episodeData = struct( ...
+                    'type', 'episode', ...
+                    'totalReward', totalReward ...
+                );
+                obj.notifyObservers(episodeData);
+
         
                 if all(doneFlags)
                     break;
@@ -72,7 +113,9 @@ classdef rl
         end
 
         function [reward, done] = step(obj, robotIdx, action)
-            dir = obj.actions{action};
+            % does one step for the reinforcement learning and returns
+            % the reward and whether the step results in a done move
+            dir = obj.Actions{action};
 
             try
                 obj.ModelGrid.move(robotIdx, dir);
@@ -96,10 +139,13 @@ classdef rl
         end
 
         function s = encodeState(obj, posn)
+            % encodes the state
             s = sub2ind(size(obj.ModelGrid.getCells()), posn(1), posn(2));
         end
 
         function reward = getReward(obj, posn)
+            % gets the reward at a given posn, -1 if there is nothing 
+            % there to punish for taking longer
             grid = obj.ModelGrid.getCells();
             val = grid(posn(1),posn(2));
             reward = 0;

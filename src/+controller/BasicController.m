@@ -14,10 +14,38 @@ classdef BasicController < handle
         function updateView(obj)
             obj.View.drawWorld();
         end
+
+        function onEvent(obj, data)
+            switch data.type
+                case 'step'
+                    obj.View.drawWorld();
+                    pause(0.1);
+                case 'episode'
+                    x = obj.View.RewardLine.XData;
+                    y = obj.View.RewardLine.YData;
+        
+                    x(end+1) = numel(x)+1;
+                    y(end+1) = data.totalReward; 
+        
+                    obj.View.RewardLine.XData = x;
+                    obj.View.RewardLine.YData = y;
+                    drawnow;
+            end
+        end
         
         function onStart(obj)
-            obj.Model.start();
-            obj.updateView();
+            numEpisodes = 50;
+            maxSteps = 200;
+            algo = algorithms.rl(obj.Model);
+
+            algo = algo.addObserver(@(data) obj.onEvent(data));
+            obj.View.RewardLine.XData = [];
+            obj.View.RewardLine.YData = [];
+        
+            for ep = 1:numEpisodes
+                [algo, totalReward] = algo.trainEpisode(maxSteps);
+                obj.onEvent(struct('type','episode','totalReward',totalReward));
+            end
         end
         
         function onReset(obj)

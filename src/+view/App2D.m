@@ -11,6 +11,8 @@ classdef App2D < matlab.apps.AppBase
         AddItemButton
         RemoveItemButton
         ReadOnlyModel
+        RewardAxes
+        RewardLine
     end
 
     methods (Access = public)
@@ -74,6 +76,18 @@ classdef App2D < matlab.apps.AppBase
             app.ControlPanel.RowHeight = repmat({'fit'},1,6);
             app.ControlPanel.Layout.Row = 1;
             app.ControlPanel.Layout.Column = 2;
+
+            % Add Reward Axes
+            app.RewardAxes = uiaxes(app.ControlPanel);
+            title(app.RewardAxes, "Episode Rewards");
+            xlabel(app.RewardAxes, "Episode");
+            ylabel(app.RewardAxes, "Total Reward");
+
+            %Reward line
+            app.RewardLine = plot(app.RewardAxes, NaN, NaN, '-o');
+            xlabel(app.RewardAxes, 'Episode');
+            ylabel(app.RewardAxes, 'Total Reward');
+            title(app.RewardAxes, 'Episode Rewards');
 
             % Buttons
             app.StartButton = uibutton(app.ControlPanel, 'push', ...

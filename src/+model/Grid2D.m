@@ -2,7 +2,7 @@ classdef Grid2D < model.AbsGrid
     % Represents a Grid that has obstacle, rewards and blank values
     % arranged in a 2D grid with robots also placed on the grid
     % the goal of each robot is to accumulate the most amount of points
-    
+
     properties (Access = private, Constant)
         KeySet = {'goal', 'mud', 'water', 'coin', 'food', 'pit'}
         ValueSet = {struct('value', 1000, 'color',[0,1,0], 'marker','s', ...
@@ -11,9 +11,9 @@ classdef Grid2D < model.AbsGrid
             'marker','o', 'size',12, 'label','Mud', 'type','negative'), ...
             struct('value', -300, 'color',[0,0,1], ...
             'marker','o', 'size',12, 'label','Water', 'type','negative'), ...
-            struct('value', 400, 'color',[1,0.84,0], ...
+            struct('value', 50, 'color',[1,0.84,0], ...
             'marker','o', 'size',10, 'label','Coin', 'type','positive'), ...
-            struct('value', 200, 'color',[1,0.5,0],  ...
+            struct('value', 30, 'color',[1,0.5,0],  ...
             'marker','o', 'size',10, 'label','Food', 'type','positive'), ...
             struct('value', -10000, 'color',[0,0,0], ...
             'marker','o', 'size',14, 'label','Pit', 'type','negative')}
@@ -25,12 +25,22 @@ classdef Grid2D < model.AbsGrid
         Cells
         Robots
         Occupied
+        InitialRobots
+        InitialOccupied
     end
-    
+
+    methods(Access = private)
+        function captureInitial(obj)
+            % captures the present initial condition of a grid
+            obj.InitialRobots = arrayfun(@(r) r.copy(), obj.Robots);
+            obj.InitialOccupied = obj.Occupied;
+        end
+    end
+
     methods
         function obj = Grid2D(rows,cols)
             %GRID Construct an instance of this class
-            %   Creates an empty grid given the x dimension 
+            %   Creates an empty grid given the x dimension
             % and y dimension
             % randomly generates different types of obstacles
             % randomly generates different types of rewards
@@ -48,6 +58,7 @@ classdef Grid2D < model.AbsGrid
             obj.Cells(obj.Goal(1), obj.Goal(2)) = valStruct.value;
             obj.Robots = [];
             obj.Occupied = zeros(rows, cols);
+            obj.captureInitial();
         end
 
         function robots = getRobots(obj)
@@ -66,24 +77,26 @@ classdef Grid2D < model.AbsGrid
         end
 
         function goal = getGoal(obj)
+            % gets the goal of the grid
             goal = obj.Goal;
         end
 
         function obj = addRobot(obj, r)
-            %Adds a robot into the grid by adding the robot to the list of 
+            %Adds a robot into the grid by adding the robot to the list of
             %robots and marks the cells as occupied in the occupy matrix
             [rows, cols] = size(obj.Occupied);
             robotPos = r.getPosn();
             if robotPos(1)<1 || robotPos(1)>rows ...
                     || robotPos(2)<1 || robotPos(2)>cols
-                    error('Grid2D:OutOfBounds', ...
-                        'Robot can not be placed out of bounds')
+                error('Grid2D:OutOfBounds', ...
+                    'Robot can not be placed out of bounds')
             elseif obj.Occupied(robotPos(1), robotPos(2)) == 1
                 error('Grid2D:OverlappingRobot', ...
                     'Robot is already present here')
             else
                 obj.Robots = [obj.Robots, r];
                 obj.Occupied(robotPos(1), robotPos(2)) = 1;
+                obj.captureInitial();
             end
         end
 
@@ -103,6 +116,7 @@ classdef Grid2D < model.AbsGrid
             obj.Occupied(posn(1), posn(2)) = 0;
             idx = arrayfun(@(r) isequal(r.getPosn(), posn), obj.Robots);
             obj.Robots(idx) = [];
+            obj.captureInitial();
         end
 
         function obj = addItem(obj, posn, itemName)
@@ -132,9 +146,9 @@ classdef Grid2D < model.AbsGrid
             end
         end
 
-       function obj = removeItem(obj, posn)
-           % removes the item at a specific position on the grid
-           % if that cell is not empty
+        function obj = removeItem(obj, posn)
+            % removes the item at a specific position on the grid
+            % if that cell is not empty
             [rows, cols] = size(obj.Cells);
             if posn(1)<1 || posn(1)>rows || posn(2)<1 || posn(2)>cols
                 error('Grid2D:OutOfBounds', 'Position is out of bounds')
@@ -151,19 +165,14 @@ classdef Grid2D < model.AbsGrid
             obj.Cells(posn(1), posn(2)) = 0;
         end
 
-        function obj = start(obj, algorithm)
-            %Starts a given algorithm on the conditions of this grid
-            % TODO : IMPLEMENT
-            play = true;
-            while(play)
-                algorithm.next(obj)
-                if obj.foundEnd()
-                    play = false;
-                end
-            end
+        function reset(obj)
+            obj.Robots = obj.InitialRobots;
+            obj.Occupied = obj.InitialOccupied;
         end
 
         function move(obj, robotIdx, dir)
+            % moves the robot at the specific index of the robot array 
+            % in the given direction
             robot = obj.Robots(robotIdx);
             obj.Occupied = robot.move(dir, obj.Occupied);
         end
@@ -181,6 +190,5 @@ classdef Grid2D < model.AbsGrid
             bool = inBounds && obj.Occupied(posn(1), posn(2)) == 0;
         end
     end
-
 end
 
