@@ -29,14 +29,6 @@ classdef Grid2D < model.AbsGrid
         InitialOccupied
     end
 
-    methods(Access = private)
-        function captureInitial(obj)
-            % captures the present initial condition of a grid
-            obj.InitialRobots = arrayfun(@(r) r.copy(), obj.Robots);
-            obj.InitialOccupied = obj.Occupied;
-        end
-    end
-
     methods
         function obj = Grid2D(rows,cols)
             %GRID Construct an instance of this class
@@ -61,6 +53,12 @@ classdef Grid2D < model.AbsGrid
             obj.captureInitial();
         end
 
+        function captureInitial(obj)
+            % captures the present initial condition of a grid
+            obj.InitialRobots = arrayfun(@(r) r.copy(), obj.Robots);
+            obj.InitialOccupied = obj.Occupied;
+        end
+
         function robots = getRobots(obj)
             %Returns a copy of all the robots present in this grid
             robots = obj.Robots;
@@ -69,6 +67,11 @@ classdef Grid2D < model.AbsGrid
         function cells = getCells(obj)
             %Returns a copy of the cells of this grid
             cells = obj.Cells;
+        end
+
+        function occupied = getOccupied(obj)
+            %Returns a copy of the cells of this grid
+            occupied = obj.Occupied;
         end
 
         function map = getMap(obj)
@@ -96,7 +99,6 @@ classdef Grid2D < model.AbsGrid
             else
                 obj.Robots = [obj.Robots, r];
                 obj.Occupied(robotPos(1), robotPos(2)) = 1;
-                obj.captureInitial();
             end
         end
 
@@ -116,7 +118,6 @@ classdef Grid2D < model.AbsGrid
             obj.Occupied(posn(1), posn(2)) = 0;
             idx = arrayfun(@(r) isequal(r.getPosn(), posn), obj.Robots);
             obj.Robots(idx) = [];
-            obj.captureInitial();
         end
 
         function obj = addItem(obj, posn, itemName)

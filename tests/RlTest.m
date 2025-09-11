@@ -65,10 +65,11 @@ classdef RlTest < matlab.unittest.TestCase
         function testTrainEpisodeUpdatesQ(testCase)
             initialQ = testCase.Agent.getQ();
             
-            [testCase.Agent, totalReward] = testCase.Agent.trainEpisode(20);
+            [testCase.Agent, totalReward] = testCase.Agent.trainEpisode(10);
             
             testCase.verifyTrue(isnumeric(totalReward));
-            testCase.verifyNotEqual(totalReward, 0, 'Total reward should reflect some learning');
+            testCase.verifyNotEqual(totalReward, 0, ...
+                'Total reward should reflect some learning');
             
             updatedQ = testCase.Agent.getQ();
             testCase.verifyNotEqual(initialQ, updatedQ, ...

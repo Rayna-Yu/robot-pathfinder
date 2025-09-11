@@ -37,6 +37,7 @@ classdef BasicController < handle
             numEpisodes = 50;
             maxSteps = 200;
             algo = algorithms.rl(obj.Model);
+            obj.Model.captureInitial();
 
             algo = algo.addObserver(@(data) obj.onEvent(data));
             obj.View.RewardLine.XData = [];

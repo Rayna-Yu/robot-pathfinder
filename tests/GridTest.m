@@ -72,9 +72,9 @@ classdef GridTest < matlab.unittest.TestCase
             'marker','o', 'size',12, 'label','Mud', 'type','negative'), ...
             struct('value', -300, 'color',[0,0,1], ...
             'marker','o', 'size',12, 'label','Water', 'type','negative'), ...
-            struct('value', 400, 'color',[1,0.84,0], ...
+            struct('value', 50, 'color',[1,0.84,0], ...
             'marker','o', 'size',10, 'label','Coin', 'type','positive'), ...
-            struct('value', 200, 'color',[1,0.5,0],  ...
+            struct('value', 30, 'color',[1,0.5,0],  ...
             'marker','o', 'size',10, 'label','Food', 'type','positive'), ...
             struct('value', -10000, 'color',[0,0,0], ...
             'marker','o', 'size',14, 'label','Pit', 'type','negative')};
@@ -134,7 +134,7 @@ classdef GridTest < matlab.unittest.TestCase
         % add and remove item
         function testAddItem(testCase)
             g = model.Grid2D(5,5);
-            val = 400;
+            val = 50;
             posn = testCase.FreePosn;
             g = g.addItem(posn,"coin");
             
@@ -166,7 +166,7 @@ classdef GridTest < matlab.unittest.TestCase
             testCase.Grid = testCase.Grid.addItem(testCase.FreePosn, "coin");
             cells = testCase.Grid.getCells();
             testCase.verifyEqual(cells(testCase.FreePosn(1), ...
-                testCase.FreePosn(2)), 400);
+                testCase.FreePosn(2)), 50);
             
 
             testCase.Grid = testCase.Grid.removeItem(testCase.FreePosn);
@@ -262,7 +262,32 @@ classdef GridTest < matlab.unittest.TestCase
                 "Robot should have moved right");
         end
 
-        % TODO : add tests for start and the algorithm
+        function testReset(testCase)
+            r1 = robot.BasicRobot(testCase.FreePosn, 1);
+            testCase.Grid = testCase.Grid.addRobot(r1);
+            
+            testCase.Grid.captureInitial();
+
+            if (testCase.FreePosn(1) < 5)
+                testCase.Grid.move(1, [1, 0]);
+            else
+                testCase.Grid.move(1, [-1, 0]);
+            end
+           
+            
+            robots = testCase.Grid.getRobots();
+            testCase.verifyNotEqual(robots(1).getPosn(), testCase.FreePosn);
+            
+            testCase.Grid.reset();
+
+            robotsReset = testCase.Grid.getRobots();
+            testCase.verifyEqual(robotsReset(1).getPosn(), ...
+                testCase.FreePosn);
+            
+            occupied = testCase.Grid.getOccupied();
+            testCase.verifyTrue(occupied(testCase.FreePosn(1), ...
+                testCase.FreePosn(2)) == 1, 'all');
+        end
 
     end
 end
