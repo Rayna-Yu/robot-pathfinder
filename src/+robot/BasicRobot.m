@@ -41,9 +41,9 @@ classdef BasicRobot < robot.AbsRobot
             posn = obj.Posn;
         end
 
-        function r = copy(obj)
-            % makes an exact copy of this robot
-            r = robot.BasicRobot(obj.Posn, obj.Speed);
+        function updatePosn(obj, posn)
+            % forces an update on the position of the robot
+            obj.Posn = posn;
         end
     end
 end

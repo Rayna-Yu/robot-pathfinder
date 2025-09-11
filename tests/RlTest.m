@@ -20,6 +20,7 @@ classdef RlTest < matlab.unittest.TestCase
             testCase.Robot2 = robot.BasicRobot([5, 5], 1);
             testCase.Grid = testCase.Grid.addRobot(testCase.Robot1);
             testCase.Grid = testCase.Grid.addRobot(testCase.Robot2);
+            testCase.Grid.captureInitial();
             testCase.Agent = algorithms.rl(testCase.Grid);
         end
     end

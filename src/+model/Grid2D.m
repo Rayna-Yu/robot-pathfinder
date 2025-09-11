@@ -25,7 +25,7 @@ classdef Grid2D < model.AbsGrid
         Cells
         Robots
         Occupied
-        InitialRobots
+        InitialRobotsPos
         InitialOccupied
     end
 
@@ -54,9 +54,13 @@ classdef Grid2D < model.AbsGrid
         end
 
         function captureInitial(obj)
-            % captures the present initial condition of a grid
-            obj.InitialRobots = arrayfun(@(r) r.copy(), obj.Robots);
-            obj.InitialOccupied = obj.Occupied;
+            obj.InitialRobotsPos = arrayfun(@(r) r.getPosn(), obj.Robots, ...
+                'UniformOutput', false);
+            obj.InitialOccupied = zeros(size(obj.Cells));
+            for r = obj.Robots
+                pos = r.getPosn();
+                obj.InitialOccupied(pos(1), pos(2)) = 1;
+            end
         end
 
         function robots = getRobots(obj)
@@ -167,7 +171,9 @@ classdef Grid2D < model.AbsGrid
         end
 
         function reset(obj)
-            obj.Robots = obj.InitialRobots;
+            for i = 1:numel(obj.Robots)
+                obj.Robots(i).updatePosn(obj.InitialRobotsPos{i});
+            end
             obj.Occupied = obj.InitialOccupied;
         end
 
