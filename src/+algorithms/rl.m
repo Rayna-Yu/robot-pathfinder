@@ -6,7 +6,7 @@ classdef rl
         ModelGrid
         Q
         alpha = 0.1
-        gamma = 0.9
+        gamma = 0.99
         epsilon = 0.3
         Actions
         Observers
@@ -49,7 +49,6 @@ classdef rl
 
         function [obj, totalReward] = trainEpisode(obj, maxSteps)
             % Trains one episode of the reinforcement learning
-            obj.ModelGrid.reset();
             totalReward = 0;
             robots = obj.ModelGrid.getRobots();
             numRobots = length(robots);

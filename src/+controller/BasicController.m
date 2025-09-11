@@ -2,12 +2,15 @@ classdef BasicController < handle
     properties
         Model
         View  
+        Algo
     end
     
     methods
         function obj = BasicController(m)
             obj.Model = m;
             obj.View = view.App2D(obj, model.ReadOnly2D(m));
+            obj.Algo = algorithms.rl(obj.Model);
+            obj.Algo = obj.Algo.addObserver(@(data) obj.onEvent(data));
             obj.updateView();
         end
 
@@ -34,18 +37,17 @@ classdef BasicController < handle
         end
         
         function onStart(obj)
-            numEpisodes = 50;
+            numEpisodes = 1;
             maxSteps = 200;
-            algo = algorithms.rl(obj.Model);
             obj.Model.captureInitial();
 
-            algo = algo.addObserver(@(data) obj.onEvent(data));
             obj.View.RewardLine.XData = [];
             obj.View.RewardLine.YData = [];
         
             for ep = 1:numEpisodes
-                [algo, totalReward] = algo.trainEpisode(maxSteps);
+                [obj.Algo, totalReward] = obj.Algo.trainEpisode(maxSteps);
                 obj.onEvent(struct('type','episode','totalReward',totalReward));
+                obj.onReset()
             end
         end
         
