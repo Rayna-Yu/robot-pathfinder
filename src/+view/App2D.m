@@ -127,6 +127,7 @@ classdef App2D < matlab.apps.AppBase
 
         function [pos, itemName] = promptAddItem(app, controller)
             itemKeys = app.ReadOnlyModel.getMap().keys;
+            itemKeys(ismember(itemKeys, {'goal'})) = [];
             d = uifigure('Name','Select Item','Position',[500 500 300 150]);
             lbl1 = uilabel(d,'Text','X Position:','Position',[10 100 60 22]);
             txtX = uieditfield(d,'numeric','Position',[80 100 50 22]);

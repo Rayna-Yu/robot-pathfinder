@@ -37,8 +37,8 @@ classdef BasicController < handle
         end
         
         function onStart(obj)
-            numEpisodes = 1;
-            maxSteps = 200;
+            numEpisodes = 30;
+            maxSteps = 100;
             obj.Model.captureInitial();
 
             obj.View.RewardLine.XData = [];
@@ -47,7 +47,7 @@ classdef BasicController < handle
             for ep = 1:numEpisodes
                 [obj.Algo, totalReward] = obj.Algo.trainEpisode(maxSteps);
                 obj.onEvent(struct('type','episode','totalReward',totalReward));
-                obj.onReset()
+                obj.onReset();
             end
         end
         
